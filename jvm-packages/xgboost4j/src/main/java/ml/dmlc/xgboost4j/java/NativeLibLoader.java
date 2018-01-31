@@ -36,6 +36,7 @@ class NativeLibLoader {
 
   static synchronized void initXGBoost() throws IOException {
     if (!initialized) {
+      System.loadLibrary("jsig");
       for (String libName : libNames) {
         smartLoad(libName);
       }
