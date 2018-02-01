@@ -37,6 +37,9 @@ class NativeLibLoader {
   static synchronized void initXGBoost() throws IOException {
     if (!initialized) {
       System.loadLibrary("jsig");
+      if (System.getProperty("os.name").equals("Linux")) {
+        smartLoad("gomp");
+      }
       for (String libName : libNames) {
         smartLoad(libName);
       }
