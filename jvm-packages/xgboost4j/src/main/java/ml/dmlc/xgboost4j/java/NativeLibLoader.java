@@ -36,7 +36,13 @@ class NativeLibLoader {
 
   static synchronized void initXGBoost() throws IOException {
     if (!initialized) {
-      System.loadLibrary("jsig");
+      try {
+        System.loadLibrary("jsig");
+      } catch (UnsatisfiedLinkError e) {
+        if (!isAlreadyLoaded(e)) {
+          throw e;
+        }
+      }
       if (System.getProperty("os.name").equals("Linux")) {
         smartLoad("gomp");
       }
@@ -67,7 +73,13 @@ class NativeLibLoader {
   private static void loadLibraryFromJar(String path) throws IOException, IllegalArgumentException{
     String temp = createTempFileFromResource(path);
     // Finally, load the library
-    System.load(temp);
+    try {
+      System.load(temp);
+    } catch (UnsatisfiedLinkError e) {
+      if (!isAlreadyLoaded(e)) {
+        throw e;
+      }
+    }
   }
 
   /**
@@ -188,5 +200,9 @@ class NativeLibLoader {
       logger.error(e.getMessage());
       throw new IOException("Failed to get field handle to set library path");
     }
+  }
+
+  private static boolean isAlreadyLoaded(UnsatisfiedLinkError e) {
+    return e.getMessage().endsWith(" already loaded in another classloader");
   }
 }
